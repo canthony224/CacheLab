@@ -22,20 +22,63 @@ void readTraceFile(void){
             int maxi = i;
             unsigned address = 0;
             for(; i >= 3; i--){
-                if(i == maxi){
-                    address = (int)traceLine[i] - 48;
+                int addrVal = (int)traceLine[i];
+                if(addrVal > 57){ //If greater than ASCII 9
+                    addrVal -= 87;
+                } else {
+                    addrVal -= 48;
                 }
-                else{
-                    address += ((int)traceLine[i] - 48) *  (int)pow(2, (4 * (maxi - i)));
+                if(i == maxi){
+                    address = addrVal;
+                } else{
+                    address += addrVal * (int)pow(2, (4 * (maxi - i)));
                 }
             }
             printf("%d \n", address);
+            loadAddress(address);
 
         }
         //fgets(traceLine, 255, file);
     }
 }
 
+/*
+int moveMemory(int address){
+
+
+}
+
+int loadMemory(int address){
+    
+
+}
+
+int storeMemory(int address){
+
+}
+*/
+
+void loadAddress(int address){
+    int bitsBlock = (address % (2 << blockBits));
+    int bitsSets = (address >> blockBits) % (2 << setBits);
+    int signBit = (address >> 31) & 0x1;
+    int bitsTag = ((address & 0x7fffffff) >> (blockBits + setBits)) + (signBit << (32 - (blockBits + setBits)));
+        
+    printf("block bit value: %x \n", bitsBlock);
+    printf("set bits value: %x \n", bitsSets);
+    printf("tag : %x \n", bitsTag);
+
+}
+
+
+
+void calculateMemory(){
+   int numBlocks = 2 << blockBits;
+   int numSets = 2 << setBits;
+   int totalMemory = numBlocks * numLines *  numSets;
+   cacheMemory = malloc(totalMemory);
+   printf("calculated memory to: %d \n",totalMemory);
+}
 
 void parseArgs(int argc, char* argv[]){
     for (int i =0; i < argc; i ++){
@@ -52,7 +95,7 @@ void parseArgs(int argc, char* argv[]){
             printf("%s", "Got here");
             i++;
             if(i < argc){
-                idxBits = atoi(argv[i]);
+                setBits = atoi(argv[i]);
             } else {
                 printf("%s \n", "Please give a valid number of set index bits.");
             }
@@ -94,10 +137,11 @@ int main(int argc, char* argv[])
 {
     parseArgs(argc, argv);
     printf("Verbose: %d \n", VERBOSE);
-    printf("idxBits: %d \n", idxBits);
+    printf("setBits: %d \n", setBits);
     printf("numLines: %d \n", numLines);
     printf("blockBits: %d \n", blockBits);
     printf("tracefile: %s \n", tracefile);
+    calculateMemory();
 
     readTraceFile();
     printSummary(0, 0, 0);
