@@ -12,7 +12,7 @@ void readTraceFile(void){
     printf("%s", "Got here! \n");
     fflush(stdout);
     while ((fgets(traceLine, 255, file)) != NULL){
-        printf("%s \n", traceLine);
+        printf("%s", traceLine);
         
         char instruction = traceLine[1];
         if (instruction != ' ') { //if there is an I or something without a space, skip line
@@ -36,9 +36,8 @@ void readTraceFile(void){
             }
             printf("%d \n", address);
             loadAddress(address);
-
+            printf("\n ----- \n\n");
         }
-        //fgets(traceLine, 255, file);
     }
 }
 
@@ -59,7 +58,7 @@ int storeMemory(int address){
 */
 
 void loadAddress(int address){
-    int bitsBlock = (address % (2 << blockBits));
+    int bitsBlock = (address % (2 << (blockBits - 1)));
     int bitsSets = (address >> blockBits) % (2 << setBits);
     int signBit = (address >> 31) & 0x1;
     int bitsTag = ((address & 0x7fffffff) >> (blockBits + setBits)) + (signBit << (32 - (blockBits + setBits)));
@@ -67,10 +66,7 @@ void loadAddress(int address){
     printf("block bit value: %x \n", bitsBlock);
     printf("set bits value: %x \n", bitsSets);
     printf("tag : %x \n", bitsTag);
-
 }
-
-
 
 void calculateMemory(){
    int numBlocks = 2 << blockBits;
