@@ -9,10 +9,8 @@
 void readTraceFile(void){
     FILE *file = fopen("./traces/yi.trace", "r");
     char traceLine[255];
-    printf("%s", "Got here! \n");
-    fflush(stdout);
     while ((fgets(traceLine, 255, file)) != NULL){
-        printf("%s", traceLine);
+        if(VERBOSE){ printf("%s", traceLine); }
         
         char instruction = traceLine[1];
         if (instruction != ' ') { //if there is an I or something without a space, skip line
@@ -34,9 +32,9 @@ void readTraceFile(void){
                     address += addrVal * (int)pow(2, (4 * (maxi - i)));
                 }
             }
-            printf("%d \n", address);
+            if(VERBOSE){ printf("%d \n", address); }
             loadAddress(address);
-            printf("\n ----- \n\n");
+            if(VERBOSE){ printf("\n ----- \n\n"); }
         }
     }
 }
@@ -63,9 +61,11 @@ void loadAddress(int address){
     int signBit = (address >> 31) & 0x1;
     int bitsTag = ((address & 0x7fffffff) >> (blockBits + setBits)) + (signBit << (32 - (blockBits + setBits)));
         
-    printf("block bit value: %x \n", bitsBlock);
-    printf("set bits value: %x \n", bitsSets);
-    printf("tag : %x \n", bitsTag);
+    if(VERBOSE){
+        printf("block bit value: %x \n", bitsBlock);
+        printf("set bits value: %x \n", bitsSets);
+        printf("tag : %x \n", bitsTag);
+    }
 }
 
 void calculateMemory(){
@@ -73,7 +73,7 @@ void calculateMemory(){
    int numSets = 2 << setBits;
    int totalMemory = numBlocks * numLines *  numSets;
    cacheMemory = malloc(totalMemory);
-   printf("calculated memory to: %d \n",totalMemory);
+   if(VERBOSE){ printf("calculated memory to: %d \n",totalMemory); }
 }
 
 void parseArgs(int argc, char* argv[]){
@@ -88,7 +88,6 @@ void parseArgs(int argc, char* argv[]){
         }
         else if (arg == 's') {
             // number of set index bits setting
-            printf("%s", "Got here");
             i++;
             if(i < argc){
                 setBits = atoi(argv[i]);
@@ -123,8 +122,6 @@ void parseArgs(int argc, char* argv[]){
                 printf("%s \n", "Please give a valid valgrind trace file name.");
             }
         }
-
-        printf("%d arg, %s \n ",i,argv[i]);
     }
 }
 
@@ -132,11 +129,13 @@ void parseArgs(int argc, char* argv[]){
 int main(int argc, char* argv[])
 {
     parseArgs(argc, argv);
-    printf("Verbose: %d \n", VERBOSE);
-    printf("setBits: %d \n", setBits);
-    printf("numLines: %d \n", numLines);
-    printf("blockBits: %d \n", blockBits);
-    printf("tracefile: %s \n", tracefile);
+    if(VERBOSE){
+        printf("Verbose: %d \n", VERBOSE);
+        printf("setBits: %d \n", setBits);
+        printf("numLines: %d \n", numLines);
+        printf("blockBits: %d \n", blockBits);
+        printf("tracefile: %s \n", tracefile);
+    }
     calculateMemory();
 
     readTraceFile();
