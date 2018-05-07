@@ -55,6 +55,11 @@ void loadMemory(int bitsSets, int bitsTag, int** timetable){
         if ((bitsTag | 0x80000000) == cacheMemory[bitsSets*numLines + currLine]){
             num_Hits++;
             if (VERBOSE)  printf("%s\n","hit");
+            for(int j = 0; currLine + j + 1 < numLines; j++){
+                int tempAddr = cacheMemory[bitsSets*numLines + currLine + j];
+                cacheMemory[bitsSets*numLines + currLine + j] = cacheMemory[bitsSets*numLines + currLine + j + 1];
+                cacheMemory[bitsSets*numLines + currLine + j + 1] = tempAddr;
+            }
             return;
         }
     }
@@ -65,10 +70,16 @@ void loadMemory(int bitsSets, int bitsTag, int** timetable){
     if(timetable[bitsSets][numLines+1] == 1){
         num_Evicts++;
         if (VERBOSE)  printf("%s","evict ");
+        for(int j = 0; j + 1 < numLines; j++){
+            int tempAddr = cacheMemory[bitsSets*numLines + j];
+            cacheMemory[bitsSets*numLines + j] = cacheMemory[bitsSets*numLines + j + 1];
+            cacheMemory[bitsSets*numLines + j + 1] = tempAddr;
+        }
+        cacheMemory[bitsSets*numLines + (numLines - 1)] = bitsTag | 0x80000000;
+    } else {
+        cacheMemory[bitsSets*numLines+timetable[bitsSets][numLines]] = bitsTag | 0x80000000;
+        timetable[bitsSets][timetable[bitsSets][numLines]] = bitsTag;
     }
-    
-    cacheMemory[bitsSets*numLines+timetable[bitsSets][numLines]] = bitsTag | 0x80000000;
-    timetable[bitsSets][timetable[bitsSets][numLines]] = bitsTag;
     num_Misses++;
     timetable[bitsSets][numLines]++;
     if (VERBOSE)  printf("%s\n","miss");
@@ -85,8 +96,6 @@ void loadAddress(int address, char instruction, int** timetable){
         printf("set bits value: %x \n", bitsSets);
         printf("tag : %x \n", bitsTag);
     }
-
-    
 
     switch(instruction){
         case 'M':
