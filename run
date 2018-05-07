@@ -2,6 +2,6 @@
 make clean
 make
 if [ $? == 0 ]; then
-  ./csim -v -s 4 -E 2 -b 4 -t traces/yi.trace
-  ./csim-ref -v -s 4 -E 2 -b 4 -t traces/yi.trace
+  ./csim -v  -s 1 -E 1 -b 1 -t traces/yi2.trace
+  ./csim-ref -v -s 1 -E 1 -b 1 -t traces/yi2.trace
 fi

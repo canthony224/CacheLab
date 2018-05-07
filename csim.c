@@ -1,14 +1,14 @@
+#include <string.h>
 #include "cachelab.h"
 #include "csim.h"
 #include "math.h"
 #include "stdlib.h"
 #include "stdio.h"
-#include <sys/queue.h>
 //Made by Ryan Houck and Caleb Anthony
 
 
 void readTraceFile(int** timetable){
-    FILE *file = fopen("./traces/yi.trace", "r");
+    FILE *file = fopen(tracefile, "r");
     char traceLine[255];
     while ((fgets(traceLine, 255, file)) != NULL){
         if(VERBOSE){ printf("%s", traceLine); }
@@ -34,6 +34,8 @@ void readTraceFile(int** timetable){
                 }
             }
             if(VERBOSE){ printf("%d \n", address); }
+            printf("Got here!");
+            fflush(stdout);
             loadAddress(address,instruction,timetable);
             if(VERBOSE){ printf("\n ----- \n\n"); }
         }
@@ -49,10 +51,10 @@ void modifyMemory(int bitsSets, int bitsTag, int** timetable){
 void loadMemory(int bitsSets, int bitsTag, int** timetable){
     //check if tag is in cache/set
     for(int currLine = 0; currLine < numLines; currLine++){
-        printf("BitsTag = %x, CacheMemory %d= %x\n",bitsTag,currLine, cacheMemory[bitsSets*numLines + currLine]) ;
+        if (VERBOSE)  printf("BitsTag = %x, CacheMemory %d= %x\n",bitsTag,currLine, cacheMemory[bitsSets*numLines + currLine]) ;
         if ((bitsTag | 0x80000000) == cacheMemory[bitsSets*numLines + currLine]){
             num_Hits++;
-            printf("%s\n","hit");
+            if (VERBOSE)  printf("%s\n","hit");
             return;
         }
     }
@@ -62,14 +64,14 @@ void loadMemory(int bitsSets, int bitsTag, int** timetable){
     }
     if(timetable[bitsSets][numLines+1] == 1){
         num_Evicts++;
-        printf("%s","evict ");
+        if (VERBOSE)  printf("%s","evict ");
     }
     
     cacheMemory[bitsSets*numLines+timetable[bitsSets][numLines]] = bitsTag | 0x80000000;
     timetable[bitsSets][timetable[bitsSets][numLines]] = bitsTag;
     num_Misses++;
     timetable[bitsSets][numLines]++;
-    printf("%s\n","miss");
+    if (VERBOSE)  printf("%s\n","miss");
 }
 
 void loadAddress(int address, char instruction, int** timetable){
