@@ -3,10 +3,11 @@
 #include "math.h"
 #include "stdlib.h"
 #include "stdio.h"
+#include <sys/queue.h>
 //Made by Ryan Houck and Caleb Anthony
 
 
-void readTraceFile(void){
+void readTraceFile(int** timetable){
     FILE *file = fopen("./traces/yi.trace", "r");
     char traceLine[255];
     while ((fgets(traceLine, 255, file)) != NULL){
@@ -33,31 +34,47 @@ void readTraceFile(void){
                 }
             }
             if(VERBOSE){ printf("%d \n", address); }
-            loadAddress(address);
+            loadAddress(address,instruction,timetable);
             if(VERBOSE){ printf("\n ----- \n\n"); }
         }
     }
 }
 
-/*
-int moveMemory(int address){
 
-
+void modifyMemory(int bitsSets, int bitsTag, int** timetable){
+    loadMemory(bitsSets, bitsTag, timetable);
+    loadMemory(bitsSets, bitsTag, timetable);
 }
 
-int loadMemory(int address){
+void loadMemory(int bitsSets, int bitsTag, int** timetable){
+    //check if tag is in cache/set
+    for(int currLine = 0; currLine < numLines; currLine++){
+        printf("BitsTag = %x, CacheMemory %d= %x\n",bitsTag,currLine, cacheMemory[bitsSets*numLines + currLine]) ;
+        if ((bitsTag | 0x80000000) == cacheMemory[bitsSets*numLines + currLine]){
+            num_Hits++;
+            printf("%s\n","hit");
+            return;
+        }
+    }
+    if(timetable[bitsSets][numLines] == numLines){
+        timetable[bitsSets][numLines] = 0;
+        timetable[bitsSets][numLines+1] = 1;
+    }
+    if(timetable[bitsSets][numLines+1] == 1){
+        num_Evicts++;
+        printf("%s","evict ");
+    }
     
-
+    cacheMemory[bitsSets*numLines+timetable[bitsSets][numLines]] = bitsTag | 0x80000000;
+    timetable[bitsSets][timetable[bitsSets][numLines]] = bitsTag;
+    num_Misses++;
+    timetable[bitsSets][numLines]++;
+    printf("%s\n","miss");
 }
 
-int storeMemory(int address){
-
-}
-*/
-
-void loadAddress(int address){
+void loadAddress(int address, char instruction, int** timetable){
     int bitsBlock = (address % (2 << (blockBits - 1)));
-    int bitsSets = (address >> blockBits) % (2 << setBits);
+    int bitsSets = (address >> (blockBits)) % (2 << (setBits - 1));
     int signBit = (address >> 31) & 0x1;
     int bitsTag = ((address & 0x7fffffff) >> (blockBits + setBits)) + (signBit << (32 - (blockBits + setBits)));
         
@@ -66,14 +83,31 @@ void loadAddress(int address){
         printf("set bits value: %x \n", bitsSets);
         printf("tag : %x \n", bitsTag);
     }
+
+    
+
+    switch(instruction){
+        case 'M':
+            modifyMemory(bitsSets, bitsTag, timetable);
+            break;
+
+        case 'L':
+            loadMemory(bitsSets, bitsTag, timetable);
+            break;
+
+        case 'S':
+            loadMemory(bitsSets, bitsTag, timetable);
+            break;
+    }
 }
 
 void calculateMemory(){
    int numBlocks = 2 << blockBits;
-   int numSets = 2 << setBits;
+   numSets = 2 << setBits;
    int totalMemory = numBlocks * numLines *  numSets;
-   cacheMemory = malloc(totalMemory);
-   if(VERBOSE){ printf("calculated memory to: %d \n",totalMemory); }
+   cacheMemory = malloc(totalMemory * sizeof(int));
+
+   if(VERBOSE){ printf("calculated memory to: %d Bytes \n",totalMemory); }
 }
 
 void parseArgs(int argc, char* argv[]){
@@ -136,9 +170,19 @@ int main(int argc, char* argv[])
         printf("blockBits: %d \n", blockBits);
         printf("tracefile: %s \n", tracefile);
     }
-    calculateMemory();
 
-    readTraceFile();
-    printSummary(0, 0, 0);
+    calculateMemory();
+    int* timetable[numSets];
+    for(int i = 0; i < numSets; i++){
+        timetable[i] = malloc((numLines+2) * sizeof(int));
+    }
+    for(int i = 0; i < numSets; i++){
+        for(int j = 0; j < numLines + 2; j++){
+            timetable[i][j] = 0;
+        }
+    }
+
+    readTraceFile(timetable);
+    printSummary(num_Hits, num_Misses, num_Evicts);
     return 0;
 }
