@@ -24,25 +24,14 @@ char transpose_submit_desc[] = "Transpose submission";
 void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 {
 	if (M == 32 && N == 32)	{
-		int innerRow, innerCol, outerRow, outerCol;
-		int temp;
-		for(outerRow = 0; outerRow < M; outerRow += 8){
-			for(outerCol = 0; outerCol < N; outerCol += 8){
-				if (outerRow == outerCol && outerRow % 16 == 0){ 
-					for (innerRow = outerRow; innerRow < outerRow +16; innerRow++){
-						for (innerCol = outerCol; innerCol < outerCol +16; innerCol++){
-							temp = A[innerRow][innerCol];	
-							B[innerCol][innerRow]=temp;
-						}
-					}
-				} else {
-					for (innerRow = outerRow; innerRow < outerRow +8; innerRow++){
-						for (innerCol = outerCol; innerCol < outerCol +8; innerCol++){
-							temp = A[innerRow][innerCol];	
-							B[innerCol][innerRow]=temp;
-						}
-					}
-				}
+		int blockSize = 8;
+		for(int outerRow = 0; outerRow < M; outerRow += blockSize){
+			for(int outerCol = 0; outerCol < N; outerCol += blockSize){
+                for (int innerRow = outerRow; innerRow < outerRow + blockSize; innerRow++){
+                    for (int innerCol = outerCol; innerCol < outerCol + blockSize; innerCol++){
+                        B[innerCol][innerRow] = A[innerRow][innerCol];
+                    }
+                }
 			}
 		}
 	}
