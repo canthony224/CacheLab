@@ -55,11 +55,17 @@ void loadMemory(int bitsSets, int bitsTag, int** timetable){
         if ((bitsTag | 0x80000000) == cacheMemory[bitsSets*numLines + currLine]){
             num_Hits++;
             if (VERBOSE)  printf("%s\n","hit");
-            for(int j = 0; currLine + j + 1 < numLines; j++){
-                int tempAddr = cacheMemory[bitsSets*numLines + currLine + j];
-                cacheMemory[bitsSets*numLines + currLine + j] = cacheMemory[bitsSets*numLines + currLine + j + 1];
-                cacheMemory[bitsSets*numLines + currLine + j + 1] = tempAddr;
-            }
+			int tempLineVal = 0;
+			for(tempLineVal = 0; tempLineVal < numLines; tempLineVal++){
+				if(!(cacheMemory[bitsSets*numLines + tempLineVal] & 0x80000000)){
+					break;
+				}
+			}
+			for(int j = 0; currLine + j + 1 < tempLineVal; j++){
+				int tempAddr = cacheMemory[bitsSets*numLines + currLine + j];
+				cacheMemory[bitsSets*numLines + currLine + j] = cacheMemory[bitsSets*numLines + currLine + j + 1];
+				cacheMemory[bitsSets*numLines + currLine + j + 1] = tempAddr;
+			}
             return;
         }
     }
