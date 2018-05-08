@@ -1,4 +1,4 @@
-/* 
+/* BY RYAN HOUCK AND CALEB ANTHONY 
  * trans.c - Matrix transpose B = A^T
  *
  * Each transpose function must have a prototype of the form:
@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include "cachelab.h"
 
+void trans(int M, int N, int A[N][M], int B[M][N]);
 int is_transpose(int M, int N, int A[N][M], int B[M][N]);
 
 /* 
@@ -22,6 +23,35 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
 char transpose_submit_desc[] = "Transpose submission";
 void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 {
+	if (M == 32 && N == 32)	{
+		int innerRow, innerCol, outerRow, outerCol;
+		int temp;
+		for(outerRow = 0; outerRow < M; outerRow += 8){
+			for(outerCol = 0; outerCol < N; outerCol += 8){
+				if (outerRow == outerCol && outerRow % 16 == 0){ 
+					for (innerRow = outerRow; innerRow < outerRow +16; innerRow++){
+						for (innerCol = outerCol; innerCol < outerCol +16; innerCol++){
+							temp = A[innerRow][innerCol];	
+							B[innerCol][innerRow]=temp;
+						}
+					}
+				} else {
+					for (innerRow = outerRow; innerRow < outerRow +8; innerRow++){
+						for (innerCol = outerCol; innerCol < outerCol +8; innerCol++){
+							temp = A[innerRow][innerCol];	
+							B[innerCol][innerRow]=temp;
+						}
+					}
+				}
+			}
+		}
+	}
+		
+	if (M == 64 && N == 64)	{
+	}
+
+	if (M == 61 && N == 67)	{
+	}
 }
 
 /* 

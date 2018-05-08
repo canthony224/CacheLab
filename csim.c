@@ -34,7 +34,7 @@ void readTraceFile(int** timetable){
                 }
             }
             if(VERBOSE){ printf("%d \n", address); }
-            printf("Got here!");
+            //printf("Got here!");
             fflush(stdout);
             loadAddress(address,instruction,timetable);
             if(VERBOSE){ printf("\n ----- \n\n"); }
