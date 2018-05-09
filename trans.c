@@ -24,8 +24,6 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
 char transpose_submit_desc[] = "Transpose submission";
 void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 {
-//	FILE * file;
-//	file = fopen("TransDebug.txt","w+");
 	if (M == 32 && N == 32)	{
 		int blockSize = 8;
 		for(int outerRow = 0; outerRow < M; outerRow += blockSize){
@@ -56,33 +54,44 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 		int blockSize = 4;
 		for(int outerRow = 0; outerRow < M; outerRow += blockSize){
 			for(int outerCol = 0; outerCol < N; outerCol += blockSize){
-                for (int innerRow = outerRow; (innerRow < outerRow + blockSize) && (innerRow < M); innerRow++){
-					int temp1 = A[innerRow][outerCol];
-					int temp2 = A[innerRow][outerCol+1];
-					int temp3 = A[innerRow][outerCol+2];
-					int temp4 = A[innerRow][outerCol+3];
+                for (int innerRow = outerRow; (innerRow < outerRow + blockSize) && (innerRow < M); innerRow += 2){
+					int temp1, temp2, temp3, temp4, temp12, temp22, temp32, temp42;
+					temp1 = A[innerRow][outerCol];
+					temp2 = A[innerRow][outerCol+1];
+					temp3 = A[innerRow][outerCol+2];
+					temp4 = A[innerRow][outerCol+3];
+					temp12 = A[innerRow+1][outerCol];
+					temp22 = A[innerRow+1][outerCol+1];
+					temp32 = A[innerRow+1][outerCol+2];
+					temp42 = A[innerRow+1][outerCol+3];
 					B[outerCol][innerRow] = temp1;
 					B[outerCol+1][innerRow] = temp2;
 					B[outerCol+2][innerRow] = temp3;
 					B[outerCol+3][innerRow] = temp4;
+					B[outerCol][innerRow+1] = temp12;
+					B[outerCol+1][innerRow+1] = temp22;
+					B[outerCol+2][innerRow+1] = temp32;
+					B[outerCol+3][innerRow+1] = temp42;
                 }
 			}
 		}
 	}
 
 	if (M == 61 && N == 67)	{
-		int blockSize = 8;
-		for(int outerRow = 0; outerRow < N; outerRow += blockSize){
-			for(int outerCol = 0; outerCol < M; outerCol += blockSize){
-                for (int innerRow = outerRow; (innerRow < outerRow + blockSize) && (innerRow < N); innerRow++){
-					int temp1 = A[innerRow][outerCol];
-					int temp2 = A[innerRow][outerCol+1];
-					int temp3 = A[innerRow][outerCol+2];
-					int temp4 = A[innerRow][outerCol+3];
-					int temp5 = A[innerRow][outerCol+4];
-					int temp6 = A[innerRow][outerCol+5];
-					int temp7 = A[innerRow][outerCol+6];
-					int temp8 = A[innerRow][outerCol+7];
+		//int blockSize = 6 <-- NOT EVEN THE RIGHT MAGIC NUMBER!!!;
+		for(int outerRow = 0; outerRow < N; outerRow += /*blockSize*/9){
+			for(int outerCol = 0; outerCol < M; outerCol += /*blockSize*/9){
+                for (int innerRow = outerRow; (innerRow < outerRow + /*blockSize*/9) && (innerRow < N); innerRow++){
+					int temp1, temp2, temp3, temp4, temp5, temp6, temp7, temp8, temp9;
+					temp1 = A[innerRow][outerCol];
+					temp2 = A[innerRow][outerCol+1];
+					temp3 = A[innerRow][outerCol+2];
+					temp4 = A[innerRow][outerCol+3];
+					temp5 = A[innerRow][outerCol+4];
+					temp6 = A[innerRow][outerCol+5];
+					temp7 = A[innerRow][outerCol+6];
+					temp8 = A[innerRow][outerCol+7];
+					temp9 = A[innerRow][outerCol+8];
 					B[outerCol][innerRow] = temp1;
 					B[outerCol+1][innerRow] = temp2;
 					B[outerCol+2][innerRow] = temp3;
@@ -91,6 +100,7 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 					B[outerCol+5][innerRow] = temp6;
 					B[outerCol+6][innerRow] = temp7;
 					B[outerCol+7][innerRow] = temp8;
+					B[outerCol+8][innerRow] = temp9;
                 }
 			}
 		}
