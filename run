@@ -1,6 +1,15 @@
 #!/bin/bash
-make clean
-make
-if [ $? == 0 ]; then
-  ./csim -v  -s 5 -E 1 -b 5 -t trace.f1
+if [[ $1 == "csim" || $1 == "trans" ]]; then
+#  make clean
+  make
+  if [ $? == 0 ]; then
+    if [[ $1 == "csim" ]]; then
+	  ./csim-ref -v  -s 5 -E 1 -b 5 -t trace.f0
+	fi
+	if [[ $1 == "trans" ]]; then
+      ./test-trans -M 64 -N 64
+	fi
+  fi
+else
+  echo "Please enter either './run csim' or './run trans' to run csim or trans operations."
 fi
