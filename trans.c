@@ -71,6 +71,29 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 	}
 
 	if (M == 61 && N == 67)	{
+		int blockSize = 8;
+		for(int outerRow = 0; outerRow < N; outerRow += blockSize){
+			for(int outerCol = 0; outerCol < M; outerCol += blockSize){
+                for (int innerRow = outerRow; (innerRow < outerRow + blockSize) && (innerRow < N); innerRow++){
+					int temp1 = A[innerRow][outerCol];
+					int temp2 = A[innerRow][outerCol+1];
+					int temp3 = A[innerRow][outerCol+2];
+					int temp4 = A[innerRow][outerCol+3];
+					int temp5 = A[innerRow][outerCol+4];
+					int temp6 = A[innerRow][outerCol+5];
+					int temp7 = A[innerRow][outerCol+6];
+					int temp8 = A[innerRow][outerCol+7];
+					B[outerCol][innerRow] = temp1;
+					B[outerCol+1][innerRow] = temp2;
+					B[outerCol+2][innerRow] = temp3;
+					B[outerCol+3][innerRow] = temp4;
+					B[outerCol+4][innerRow] = temp5;
+					B[outerCol+5][innerRow] = temp6;
+					B[outerCol+6][innerRow] = temp7;
+					B[outerCol+7][innerRow] = temp8;
+                }
+			}
+		}
 	}
 }
 

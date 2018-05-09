@@ -7,7 +7,7 @@ if [[ $1 == "csim" || $1 == "trans" ]]; then
 	  ./csim-ref -v  -s 5 -E 1 -b 5 -t trace.f0
 	fi
 	if [[ $1 == "trans" ]]; then
-      ./test-trans -M 64 -N 64
+      ./test-trans -M 61 -N 67
 	fi
   fi
 else
